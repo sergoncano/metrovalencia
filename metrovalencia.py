@@ -34,6 +34,34 @@ def line_color(n):
     
     raise NotImplemented
 
+def fix_station_name(station):
+    # Metrovalencia's API is bugged and stations in line 3 after Rafelbunyol and before Mislata Almassil are displayed with wrong names
+    fixes = {
+                2: "La pobla de Farnals",
+                3: "Massamagrel",
+                4: "Museros",
+                5: "Alabat dels Sorells",
+                6: "Foios",
+                7: "Meliana",
+                8: "Almassera",
+                9: "Alboraia Peris Aragó",
+                10: "Alboraia Palmaret",
+                11: "Machado",
+                12: "Benimaclet",
+                13: "Facultats - Manuel Brosseta",
+                14: "Alameda",
+                15: "Colón",
+                16: "Xàtiva",
+                17: "Àngel Guimerá",
+                18: "Avinguda del Cid",
+                19: "Nou d'Octubre",
+                20: "Mislata"
+            }
+    if station['id'] in fixes:
+        station['name'] = fixes[station['id']]  
+     
+
+
 def get_stations():
     stations_raw = requests.get("https://valencia.opendatasoft.com/api/explore/v2.1/catalog/datasets/fgv-estacions-estaciones/exports/json?lang=es&timezone=Europe%2FBerlin").json()
 
@@ -46,6 +74,7 @@ def get_stations():
             'lines': [int(x) for x in station['linea'].split(',')],
             'location': station['geo_shape']['geometry']['coordinates'][::-1]
         }
+        fix_station_name(stations[station_id])
 
     return stations
 
