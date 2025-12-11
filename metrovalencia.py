@@ -62,7 +62,7 @@ def fix_station_name(station):
      
 
 
-def get_stations():
+def get_stations(fix):
     stations_raw = requests.get("https://valencia.opendatasoft.com/api/explore/v2.1/catalog/datasets/fgv-estacions-estaciones/exports/json?lang=es&timezone=Europe%2FBerlin").json()
 
     stations = {}
@@ -74,7 +74,8 @@ def get_stations():
             'lines': [int(x) for x in station['linea'].split(',')],
             'location': station['geo_shape']['geometry']['coordinates'][::-1]
         }
-        fix_station_name(stations[station_id])
+        if fix:
+            fix_station_name(stations[station_id])
 
     return stations
 
@@ -128,10 +129,12 @@ if __name__ == "__main__":
     parser.add_argument("station", help="The station name or internal ID")
     parser.add_argument("-f", "--format", choices=["minutes", "seconds", "mmss"], default="minutes", help="How the time of arrival will be formatted")
     parser.add_argument("-d", "--delay", default=15, help="Delay between requests")
+    parser.add_argument("-n", "--no-fix", action="store_true", help="Do not fix incorrect names from the API's response")
+
 
     args = parser.parse_args()
 
-    stations = get_stations()
+    stations = get_stations(not args.no_fix)
 
     selected_station = None
 
